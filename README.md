@@ -278,4 +278,4 @@ const fv = new FastValue({
 
 ## 📄 许可证
 
-[自定义协议](../fast-value?tab=License-1-ov-file) © FastValue Team
+[自定义协议](https://github.com/bainano/fast-value?tab=License-1-ov-file) © FastValue Team
