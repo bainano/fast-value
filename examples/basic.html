@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastValue - 基础示例</title>
+    <link rel="stylesheet" href="../src/fast-value.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ FastValue 基础示例</h1>
+        
+        <!-- 基础数值示例 -->
+        <div class="section">
+            <h2 class="section-title">基础数值</h2>
+            <div class="fv-grid">
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">简单数值</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-primary" 
+                               data-fv-id="simple-number"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">带单位</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-success" 
+                               data-fv-id="with-unit"
+                               fv-unit=" Mbps"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">带前缀</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-currency fv-warning" 
+                               data-fv-id="with-prefix"
+                               fv-prefix="$"
+                               value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 格式化示例 -->
+        <div class="section">
+            <h2 class="section-title">格式化数值</h2>
+            <div class="fv-grid">
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">货币格式</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-currency fv-primary" 
+                               data-fv-id="currency"
+                               fv-format="currency"
+                               fv-format-options='{"symbol": "¥", "decimals": 2}'
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">百分比</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-percent fv-success" 
+                               data-fv-id="percent"
+                               fv-format="percent"
+                               fv-format-options='{"decimals": 1}'
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">文件大小</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-warning" 
+                               data-fv-id="bytes"
+                               fv-format="bytes"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">数字千分位</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-danger" 
+                               data-fv-id="number-format"
+                               fv-format="number"
+                               fv-format-options='{"decimals": 0, "separator": ","}'
+                               value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分组示例 -->
+        <div class="section">
+            <h2 class="section-title">分组更新</h2>
+            <div class="fv-grid">
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">服务器 1 - CPU</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-primary" 
+                               data-fv-id="server1-cpu"
+                               fv-group="servers"
+                               fv-format="percent"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">服务器 1 - 内存</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-success" 
+                               data-fv-id="server1-mem"
+                               fv-group="servers"
+                               fv-format="bytes"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">服务器 2 - CPU</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-primary" 
+                               data-fv-id="server2-cpu"
+                               fv-group="servers"
+                               fv-format="percent"
+                               value="0">
+                    </div>
+                </div>
+                
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">服务器 2 - 内存</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-success" 
+                               data-fv-id="server2-mem"
+                               fv-group="servers"
+                               fv-format="bytes"
+                               value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 动画示例 -->
+        <div class="section">
+            <h2 class="section-title">更新动画</h2>
+            <div class="fv-grid">
+                <div class="fv-card">
+                    <div class="fv-card-header">
+                        <div class="fv-card-title">带动画效果</div>
+                    </div>
+                    <div class="fv-card-value">
+                        <input type="text" 
+                               class="fv-input fv-large fv-number fv-primary" 
+                               data-fv-id="animated"
+                               fv-animate
+                               fv-format="number"
+                               fv-format-options='{"decimals": 2}'
+                               value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="fv-controls">
+            <button class="fv-btn fv-btn-primary" onclick="startDemo()">开始演示</button>
+            <button class="fv-btn" onclick="updateOnce()">更新一次</button>
+            <button class="fv-btn" onclick="batchUpdate()">批量更新</button>
+            <button class="fv-btn fv-btn-danger" onclick="stopDemo()">停止</button>
+        </div>
+        
+        <!-- 统计面板 -->
+        <div class="fv-stats">
+            <div class="fv-stat-item">
+                <span class="fv-stat-label">更新次数</span>
+                <span class="fv-stat-value" id="update-count">0</span>
+            </div>
+            <div class="fv-stat-item">
+                <span class="fv-stat-label">已注册元素</span>
+                <span class="fv-stat-value" id="element-count">0</span>
+            </div>
+            <div class="fv-stat-item">
+                <span class="fv-stat-label">分组数量</span>
+                <span class="fv-stat-value" id="group-count">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../src/fast-value.js"></script>
+    <script>
+        // 初始化 FastValue
+        const fv = new FastValue({
+            batchUpdate: true,
+            batchDelay: 16 // 约60fps
+        });
+        
+        let demoInterval = null;
+        let updateCount = 0;
+        
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('update-count').textContent = updateCount;
+            document.getElementById('element-count').textContent = fv.getIds().length;
+            document.getElementById('group-count').textContent = fv.getGroups().length;
+        }
+        
+        // 生成随机值
+        function randomValue(type) {
+            switch(type) {
+                case 'cpu': return Math.random() * 100;
+                case 'memory': return Math.random() * 16 * 1024 * 1024 * 1024; // 16GB in bytes
+                case 'currency': return Math.random() * 10000;
+                case 'bytes': return Math.random() * 1024 * 1024 * 1024;
+                default: return Math.random() * 1000;
+            }
+        }
+        
+        // 开始演示
+        function startDemo() {
+            if (demoInterval) return;
+            
+            demoInterval = setInterval(() => {
+                // 单个更新
+                fv.set('simple-number', Math.floor(randomValue()));
+                fv.set('with-unit', Math.floor(randomValue('cpu')));
+                fv.set('with-prefix', randomValue('currency').toFixed(2));
+                
+                // 格式化更新
+                fv.set('currency', randomValue('currency'));
+                fv.set('percent', randomValue('cpu'));
+                fv.set('bytes', randomValue('bytes'));
+                fv.set('number-format', randomValue() * 10000);
+                
+                // 动画更新
+                fv.set('animated', randomValue());
+                
+                // 分组更新
+                fv.setGroup('servers', {
+                    'server1-cpu': randomValue('cpu'),
+                    'server1-mem': randomValue('memory'),
+                    'server2-cpu': randomValue('cpu'),
+                    'server2-mem': randomValue('memory')
+                });
+                
+                updateCount++;
+                updateStats();
+            }, 1000);
+        }
+        
+        // 更新一次
+        function updateOnce() {
+            fv.set('simple-number', Math.floor(randomValue()));
+            fv.set('currency', randomValue('currency'));
+            fv.set('percent', randomValue('cpu'));
+            updateCount++;
+            updateStats();
+        }
+        
+        // 批量更新
+        function batchUpdate() {
+            fv.setBatch({
+                'simple-number': Math.floor(randomValue()),
+                'with-unit': Math.floor(randomValue('cpu')),
+                'with-prefix': randomValue('currency').toFixed(2),
+                'currency': randomValue('currency'),
+                'percent': randomValue('cpu'),
+                'bytes': randomValue('bytes'),
+                'number-format': randomValue() * 10000,
+                'animated': randomValue()
+            });
+            updateCount++;
+            updateStats();
+        }
+        
+        // 停止演示
+        function stopDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+        }
+        
+        // 监听更新事件
+        fv.on('beforeUpdate', (data) => {
+            console.log('Before update:', data);
+        });
+        
+        fv.on('afterUpdate', (data) => {
+            console.log('After update:', data);
+        });
+        
+        // 初始化统计
+        updateStats();
+    </script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastValue - 实时监控仪表盘</title>
+    <link rel="stylesheet" href="../src/fast-value.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .dashboard {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .dashboard-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #10ac84;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10ac84;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 系统指标卡片 */
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color, #00d4ff), transparent);
+        }
+        
+        .metric-card.cpu { --accent-color: #ff6b6b; }
+        .metric-card.memory { --accent-color: #4834d4; }
+        .metric-card.network { --accent-color: #00d2d3; }
+        .metric-card.storage { --accent-color: #5f27cd; }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .metric-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            background: var(--accent-color, #00d4ff);
+            opacity: 0.9;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+        
+        .metric-value-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+        }
+        
+        .metric-unit {
+            font-size: 1rem;
+            opacity: 0.5;
+        }
+        
+        .metric-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .metric-change.positive {
+            background: rgba(16, 172, 132, 0.15);
+            color: #1dd1a1;
+        }
+        
+        .metric-change.negative {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+        }
+        
+        /* 图表区域 */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .chart-label {
+            width: 100px;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        
+        .chart-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .chart-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .chart-value {
+            width: 80px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* 实时日志 */
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .log-time {
+            color: #00d4ff;
+            margin-right: 8px;
+        }
+        
+        .log-info { color: #1dd1a1; }
+        .log-warn { color: #f39c12; }
+        .log-error { color: #ff6b6b; }
+        
+        /* 控制栏 */
+        .control-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+        }
+        
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+        
+        /* 统计信息 */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- 头部 -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">🚀 系统实时监控</h1>
+            <div class="dashboard-status">
+                <span class="status-dot"></span>
+                <span>运行中</span>
+            </div>
+        </div>
+        
+        <!-- 统计栏 -->
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">更新频率</div>
+                <input type="text" class="fv-input stat-value" data-fv-id="update-rate" value="1,000ms">
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">总更新次数</div>
+                <input type="text" class="fv-input stat-value" data-fv-id="total-updates" value="0">
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">平均耗时</div>
+                <input type="text" class="fv-input stat-value" data-fv-id="avg-duration" value="0ms">
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">活跃连接</div>
+                <input type="text" class="fv-input stat-value" data-fv-id="active-connections" value="0">
+            </div>
+        </div>
+        
+        <!-- 控制栏 -->
+        <div class="control-bar">
+            <button class="btn btn-primary" onclick="startMonitoring()">开始监控</button>
+            <button class="btn" onclick="pauseMonitoring()">暂停</button>
+            <button class="btn btn-danger" onclick="stopMonitoring()">停止</button>
+            <button class="btn" onclick="simulateAlert()">模拟警报</button>
+        </div>
+        
+        <!-- 系统指标 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">系统资源</h2>
+            </div>
+            <div class="fv-grid">
+                <div class="metric-card cpu">
+                    <div class="metric-header">
+                        <div class="metric-icon">🖥️</div>
+                        <div class="metric-label">CPU 使用率</div>
+                    </div>
+                    <div class="metric-value-wrapper">
+                        <input type="text" 
+                               class="fv-input metric-value" 
+                               data-fv-id="cpu-usage"
+                               fv-format="number"
+                               fv-format-options='{"decimals": 1}'
+                               fv-animate
+                               value="0">
+                        <span class="metric-unit">%</span>
+                    </div>
+                    <div class="metric-change positive" id="cpu-change">
+                        <span>↑</span> <span>+0.0%</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card memory">
+                    <div class="metric-header">
+                        <div class="metric-icon">💾</div>
+                        <div class="metric-label">内存使用</div>
+                    </div>
+                    <div class="metric-value-wrapper">
+                        <input type="text" 
+                               class="fv-input metric-value" 
+                               data-fv-id="memory-usage"
+                               fv-format="bytes"
+                               fv-animate
+                               value="0">
+                    </div>
+                    <div class="metric-change positive" id="memory-change">
+                        <span>↑</span> <span>+0 MB</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card network">
+                    <div class="metric-header">
+                        <div class="metric-icon">🌐</div>
+                        <div class="metric-label">网络速度</div>
+                    </div>
+                    <div class="metric-value-wrapper">
+                        <input type="text" 
+                               class="fv-input metric-value" 
+                               data-fv-id="network-speed"
+                               fv-format="number"
+                               fv-format-options='{"decimals": 0}'
+                               fv-animate
+                               value="0">
+                        <span class="metric-unit">Mbps</span>
+                    </div>
+                    <div class="metric-change positive" id="network-change">
+                        <span>↑</span> <span>+0 Mbps</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card storage">
+                    <div class="metric-header">
+                        <div class="metric-icon">💿</div>
+                        <div class="metric-label">磁盘 I/O</div>
+                    </div>
+                    <div class="metric-value-wrapper">
+                        <input type="text" 
+                               class="fv-input metric-value" 
+                               data-fv-id="disk-io"
+                               fv-format="number"
+                               fv-format-options='{"decimals": 1}'
+                               fv-animate
+                               value="0">
+                        <span class="metric-unit">MB/s</span>
+                    </div>
+                    <div class="metric-change negative" id="disk-change">
+                        <span>↓</span> <span>-0.0 MB/s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 应用性能图表 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">应用性能</h2>
+            </div>
+            <div class="chart-container">
+                <div class="chart-bar">
+                    <span class="chart-label">API 响应</span>
+                    <div class="chart-track">
+                        <div class="chart-fill" id="api-bar" style="width: 0%; background: linear-gradient(90deg, #00d4ff, #0099cc);"></div>
+                    </div>
+                    <input type="text" 
+                           class="fv-input chart-value" 
+                           data-fv-id="api-response"
+                           fv-format="number"
+                           fv-format-options='{"decimals": 0}'
+                           value="0"> ms
+                </div>
+                <div class="chart-bar">
+                    <span class="chart-label">数据库</span>
+                    <div class="chart-track">
+                        <div class="chart-fill" id="db-bar" style="width: 0%; background: linear-gradient(90deg, #4834d4, #686de0);"></div>
+                    </div>
+                    <input type="text" 
+                           class="fv-input chart-value" 
+                           data-fv-id="db-latency"
+                           fv-format="number"
+                           fv-format-options='{"decimals": 0}'
+                           value="0"> ms
+                </div>
+                <div class="chart-bar">
+                    <span class="chart-label">缓存命中</span>
+                    <div class="chart-track">
+                        <div class="chart-fill" id="cache-bar" style="width: 0%; background: linear-gradient(90deg, #10ac84, #1dd1a1);"></div>
+                    </div>
+                    <input type="text" 
+                           class="fv-input chart-value" 
+                           data-fv-id="cache-hit"
+                           fv-format="percent"
+                           fv-format-options='{"decimals": 1}'
+                           value="0">
+                </div>
+                <div class="chart-bar">
+                    <span class="chart-label">错误率</span>
+                    <div class="chart-track">
+                        <div class="chart-fill" id="error-bar" style="width: 0%; background: linear-gradient(90deg, #ff6b6b, #ee5a24);"></div>
+                    </div>
+                    <input type="text" 
+                           class="fv-input chart-value" 
+                           data-fv-id="error-rate"
+                           fv-format="percent"
+                           fv-format-options='{"decimals": 2}'
+                           value="0">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 实时日志 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">系统日志</h2>
+            </div>
+            <div class="log-container" id="log-container">
+                <div class="log-entry">
+                    <span class="log-time">[00:00:00]</span>
+                    <span class="log-info">系统初始化完成</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../src/fast-value.js"></script>
+    <script>
+        // 初始化 FastValue
+        const fv = new FastValue({
+            batchUpdate: true,
+            batchDelay: 16
+        });
+        
+        let monitoringInterval = null;
+        let updateCount = 0;
+        let totalDuration = 0;
+        let lastValues = {};
+        
+        // 生成随机数据
+        function generateMetrics() {
+            return {
+                cpu: Math.random() * 30 + 20 + (Math.random() > 0.9 ? 30 : 0), // 偶尔 spikes
+                memory: Math.random() * 4 * 1024 * 1024 * 1024 + 2 * 1024 * 1024 * 1024,
+                network: Math.random() * 500 + 50,
+                disk: Math.random() * 100 + 10,
+                apiResponse: Math.random() * 100 + 20,
+                dbLatency: Math.random() * 50 + 5,
+                cacheHit: Math.random() * 20 + 80,
+                errorRate: Math.random() * 0.5,
+                connections: Math.floor(Math.random() * 500 + 100)
+            };
+        }
+        
+        // 更新变化指示器
+        function updateChangeIndicator(id, current, last, unit = '') {
+            const el = document.getElementById(id);
+            if (!el || last === undefined) return;
+            
+            const diff = current - last;
+            const isPositive = diff >= 0;
+            const absDiff = Math.abs(diff);
+            
+            el.className = 'metric-change ' + (isPositive ? 'positive' : 'negative');
+            el.innerHTML = `<span>${isPositive ? '↑' : '↓'}</span> <span>${isPositive ? '+' : '-'}${absDiff.toFixed(1)}${unit}</span>`;
+        }
+        
+        // 更新图表
+        function updateCharts(metrics) {
+            document.getElementById('api-bar').style.width = Math.min(metrics.apiResponse, 100) + '%';
+            document.getElementById('db-bar').style.width = Math.min(metrics.dbLatency * 2, 100) + '%';
+            document.getElementById('cache-bar').style.width = metrics.cacheHit + '%';
+            document.getElementById('error-bar').style.width = Math.min(metrics.errorRate * 10, 100) + '%';
+        }
+        
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('log-container');
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
+            container.insertBefore(entry, container.firstChild);
+            
+            // 限制日志数量
+            while (container.children.length > 50) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        // 开始监控
+        function startMonitoring() {
+            if (monitoringInterval) return;
+            
+            addLog('开始系统监控...', 'info');
+            
+            monitoringInterval = setInterval(() => {
+                const startTime = performance.now();
+                const metrics = generateMetrics();
+                
+                // 批量更新所有值
+                fv.setBatch({
+                    'cpu-usage': metrics.cpu,
+                    'memory-usage': metrics.memory,
+                    'network-speed': metrics.network,
+                    'disk-io': metrics.disk,
+                    'api-response': metrics.apiResponse,
+                    'db-latency': metrics.dbLatency,
+                    'cache-hit': metrics.cacheHit,
+                    'error-rate': metrics.errorRate,
+                    'active-connections': metrics.connections
+                });
+                
+                // 更新变化指示器
+                updateChangeIndicator('cpu-change', metrics.cpu, lastValues.cpu, '%');
+                updateChangeIndicator('memory-change', metrics.memory / 1024 / 1024, lastValues.memory / 1024 / 1024, ' MB');
+                updateChangeIndicator('network-change', metrics.network, lastValues.network, ' Mbps');
+                updateChangeIndicator('disk-change', metrics.disk, lastValues.disk, ' MB/s');
+                
+                // 更新图表
+                updateCharts(metrics);
+                
+                // 保存当前值
+                lastValues = { ...metrics };
+                
+                // 更新统计
+                updateCount++;
+                const duration = performance.now() - startTime;
+                totalDuration += duration;
+                
+                fv.set('total-updates', updateCount);
+                fv.set('avg-duration', (totalDuration / updateCount).toFixed(2) + 'ms');
+                
+                // 随机日志
+                if (Math.random() > 0.95) {
+                    addLog(`CPU 使用率峰值: ${metrics.cpu.toFixed(1)}%`, 'warn');
+                }
+                if (metrics.errorRate > 0.3) {
+                    addLog(`错误率过高: ${metrics.errorRate.toFixed(2)}%`, 'error');
+                }
+            }, 1000);
+        }
+        
+        // 暂停监控
+        function pauseMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+                addLog('监控已暂停', 'warn');
+            }
+        }
+        
+        // 停止监控
+        function stopMonitoring() {
+            pauseMonitoring();
+            updateCount = 0;
+            totalDuration = 0;
+            lastValues = {};
+            
+            // 重置所有值
+            fv.setBatch({
+                'cpu-usage': 0,
+                'memory-usage': 0,
+                'network-speed': 0,
+                'disk-io': 0,
+                'api-response': 0,
+                'db-latency': 0,
+                'cache-hit': 0,
+                'error-rate': 0,
+                'active-connections': 0,
+                'total-updates': 0,
+                'avg-duration': '0ms'
+            });
+            
+            // 重置图表
+            document.getElementById('api-bar').style.width = '0%';
+            document.getElementById('db-bar').style.width = '0%';
+            document.getElementById('cache-bar').style.width = '0%';
+            document.getElementById('error-bar').style.width = '0%';
+            
+            addLog('监控已停止，数据已重置', 'info');
+        }
+        
+        // 模拟警报
+        function simulateAlert() {
+            addLog('模拟高负载警报！', 'error');
+            
+            // 生成高负载数据
+            fv.setBatch({
+                'cpu-usage': 95.5,
+                'memory-usage': 15.5 * 1024 * 1024 * 1024,
+                'error-rate': 5.5
+            });
+            
+            updateChangeIndicator('cpu-change', 95.5, lastValues.cpu || 50, '%');
+            
+            setTimeout(() => {
+                addLog('负载恢复正常', 'info');
+            }, 3000);
+        }
+        
+        // 监听更新事件
+        fv.on('afterUpdate', (data) => {
+            if (data.duration > 1) {
+                console.log('Slow update detected:', data);
+            }
+        });
+        
+        // 页面加载完成后自动开始
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(startMonitoring, 500);
+        });
+    </script>
+</body>
+</html>
