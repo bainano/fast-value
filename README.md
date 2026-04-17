@@ -33,7 +33,7 @@
 git clone https://github.com/yourusername/fast-value.git
 ```
 
-### CDN
+### CDN（暂无，当个乐子即可）
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fast-value@1.0.0/dist/fast-value.min.css">
