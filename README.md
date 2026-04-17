@@ -11,8 +11,8 @@
 [![GitHub Issues](https://img.shields.io/github/issues/bainano/fast-value)](https://github.com/bainano/fast-value/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/bainano/fast-value)](https://github.com/bainano/fast-value/pulls)
 
-[Demo Basic](https://bainano.github.io/fast-value/basic.html)
-[Demo Dashboard](https://bainano.github.io/fast-value/dashboard.html)
+[Demo Basic](https://bainano.github.io/fast-value/examples/basic.html)
+[Demo Dashboard](https://bainano.github.io/fast-value/examples/dashboard.html)
 
 ## ✨ 特性
 
