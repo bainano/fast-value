@@ -278,4 +278,4 @@ const fv = new FastValue({
 
 ## 📄 许可证
 
-[MIT](LICENSE) © FastValue Team
+[自定义协议]([LICENSE](?tab=License-1-ov-file)) © FastValue Team
